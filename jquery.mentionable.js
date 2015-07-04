@@ -77,7 +77,9 @@
       "id" : "mentioned-user-list",
       "minimumChar" : 2,
       "parameterName" : "mentioning",
-      "position" : "bottom"
+      "position" : "bottom",
+      "method":"get",//jdev, get or set
+      "params":""//jdev, extra parameters to be addedto request as a json string
     }, opts);
     userListWrapper = $("<ul id='" + options.id + "'></ul>");
 
@@ -218,15 +220,35 @@
 
       userList.html("");
       var data = {};
-      if(keyword != undefined){
-        data[options.parameterName] = keyword.substring(1, keyword.length);
+      var method=options.method;
+      var extraParameters="";
+      for (property in options.params) {
+        var value = options.params[property];
+        extraParameters+=property + "=" + value+"&"; 
       }
+        console.log(extraParameters);
+      if(keyword != undefined){
+          extraParameters+=options.parameterName+'='+keyword.replace("@" ,"");
+      }
+        
       if(onComplete != undefined){
-        $.getJSON(targetURL, data, onComplete);
+          $.ajax({
+              type: method,
+              url: targetURL,
+              data: extraParameters,
+              success: onComplete,
+              dataType: "json"
+            });
       }
       else{
-        $.getJSON(targetURL, data, function(data){
-          fillItems(data);
+        $.ajax({
+              type: method,
+              url: targetURL,
+              data: extraParameters,
+              success: function(data){
+                        fillItems(data);
+                    },
+              dataType: "json"
         });
       }
       bindItemClicked();
@@ -379,3 +401,4 @@
   }
 
 })( jQuery );
+
